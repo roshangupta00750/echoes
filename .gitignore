@@ -1,0 +1,13 @@
+# Godot's cache and imports (rebuilt on open)
+.godot/
+*.import.tmp
+# builds
+*.apk
+*.aab
+*.idsig
+builds/
+# old working copies of scripts
+tools/*_v*.gd.txt
+tools/*_solo_v1.gd.txt
+# OS junk
+.DS_Store
