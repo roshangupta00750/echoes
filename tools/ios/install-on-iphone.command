@@ -10,7 +10,7 @@
 # With a free Apple ID the app works for 7 days; run this again to renew it.
 
 cd "$(dirname "$0")"
-exec > >(tee ios-install-log.txt) 2>&1
+exec > >(tee ECHOES-ios-install-log.txt) 2>&1
 echo "ECHOES iOS installer: $(date)"
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 fail() { echo; echo "RESULT: $1"; echo "$2"; read -t 120 -p "Press Enter to close"; exit 1; }
@@ -19,12 +19,19 @@ fail() { echo; echo "RESULT: $1"; echo "$2"; read -t 120 -p "Press Enter to clos
 xcodebuild -checkFirstLaunchStatus >/dev/null 2>&1 || fail XCODE_FIRST_LAUNCH "Open Xcode once and let it finish installing its components, then run this again."
 
 # the Xcode project: next to this script (from the GitHub release), or exported by Godot into build/ios
-PROJ=ios
-if [ ! -d ios/ECHOES.xcodeproj ]; then
-  if [ -f ECHOES-ios-project.tgz ]; then
-    echo "Unpacking the Xcode project..."; tar xzf ECHOES-ios-project.tgz || fail NO_PROJECT "Could not unpack ECHOES-ios-project.tgz."
-  elif [ -d ../../build/ios/ECHOES.xcodeproj ]; then
-    PROJ=../../build/ios
+# Everything this script makes goes into one folder, ECHOES-ios, next to it.
+W=ECHOES-ios
+mkdir -p "$W"
+PROJ=$W/ios
+# unpack the release's project the first time, and again whenever a newer ECHOES-ios-project.tgz is downloaded
+if [ -f ECHOES-ios-project.tgz ] && { [ ! -f "$W/.unpacked" ] || [ ECHOES-ios-project.tgz -nt "$W/.unpacked" ]; }; then
+  echo "Unpacking the Xcode project..."; rm -rf "$W/ios" "$W/build"
+  tar xzf ECHOES-ios-project.tgz -C "$W" || fail NO_PROJECT "Could not unpack ECHOES-ios-project.tgz."
+  touch "$W/.unpacked"
+fi
+if [ ! -d "$PROJ/ECHOES.xcodeproj" ]; then
+  if [ -d ../../build/ios/ECHOES.xcodeproj ]; then
+    PROJ=../../build/ios         # running from tools/ios in the source code, after a Godot export
   else
     fail NO_PROJECT "Put ECHOES-ios-project.tgz (from the GitHub release) next to this script, or export the iOS preset from Godot first."
   fi
@@ -61,12 +68,12 @@ echo "Device: $DEV"
 
 echo "--- building (the first time takes a few minutes)..."
 xcodebuild -project "$PROJ/ECHOES.xcodeproj" -scheme ECHOES -configuration Release \
-  -destination generic/platform=iOS -derivedDataPath build \
+  -destination generic/platform=iOS -derivedDataPath "$W/build" \
   -allowProvisioningUpdates -allowProvisioningDeviceRegistration \
   DEVELOPMENT_TEAM="$TEAM" PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE" \
   CODE_SIGN_STYLE=Automatic CODE_SIGN_IDENTITY="Apple Development" build 2>&1 | tail -25
-APP=build/Build/Products/Release-iphoneos/ECHOES.app
-[ -d "$APP" ] || fail BUILD_FAILED "The build failed: the lines above say why. ios-install-log.txt has everything."
+APP=$W/build/Build/Products/Release-iphoneos/ECHOES.app
+[ -d "$APP" ] || fail BUILD_FAILED "The build failed: the lines above say why. ECHOES-ios-install-log.txt has everything."
 
 echo "--- installing on the device..."
 xcrun devicectl device install app --device "$DEV" "$APP" || fail INSTALL_FAILED "Keep the device unlocked and plugged in, then run this again."

@@ -9,7 +9,7 @@
 **[⬇ Download ECHOES for Android (APK)](https://github.com/roshangupta00750/echoes/releases/latest/download/echoes.apk)**: one click and the file downloads.
 
 - Every version, with release notes: **[Releases](https://github.com/roshangupta00750/echoes/releases)**
-- **iPhone / iPad:** there's no App Store version. You install it yourself from a Mac or a Windows PC, signed with your own free Apple ID. See [Install on iPhone or iPad](#install-on-iphone-or-ipad).
+- **iPhone / iPad:** not on the App Store. You install it yourself from a Mac or a Windows PC with your free Apple ID. See [Install on iPhone or iPad](#install-on-iphone-or-ipad).
 - Coming soon on **F-Droid**.
 - Needs Android 7.0 or newer (64-bit / arm64, which is almost every phone from the last few years).
 
@@ -54,35 +54,88 @@ adb install -r echoes.apk
 ```
 
 ## Install on iPhone or iPad
-Apple doesn't let an app file be installed on iPhones the way an APK is installed on Android.
-You install ECHOES from a computer instead, signed with **your own Apple ID**. A free one is fine.
-With a free Apple ID the game keeps working for **7 days**; after that, plug in and install again to renew it.
-Nothing is lost when you renew it.
+ECHOES isn't on the App Store, and Apple doesn't allow installing an app file straight onto an iPhone the way an APK
+goes onto Android. Instead you plug the iPhone or iPad into a computer once and install the game from there.
+It's signed with **your own Apple ID**, and the free one you already use for the App Store and iCloud is enough.
+You don't need to pay for anything.
 
-First, on the iPhone or iPad, once: plug it into the computer, unlock it and tap **Trust**.
-Then turn on **Settings → Privacy & Security → Developer Mode** (the device restarts).
+**What you need**
+- An iPhone or iPad on iOS / iPadOS 14 or newer
+- A USB cable for it
+- A Mac (way A, below) or a Windows PC (way B). Way B also works on a Mac without Xcode.
+- Your Apple ID and password
 
-### From a Mac (with Xcode)
-1. Install **Xcode** from the Mac App Store and open it once.
-2. In Xcode: **Settings → Accounts → +** → sign in with your Apple ID.
+**Good to know before you start**
+- With a free Apple ID the game runs for **7 days**. After that it won't open until you plug in and install again.
+  That takes a minute, and your progress, medals and best scores are kept.
+- A free Apple ID can have at most 3 self-installed apps on a device at the same time.
+
+### Step 1: get the device ready (once)
+1. Unlock the iPhone/iPad and plug it into the computer. When it asks **Trust This Computer?**, tap **Trust** and enter your passcode.
+2. On iOS 16 or newer, turn on **Developer Mode**: **Settings → Privacy & Security → Developer Mode → On**. The device restarts. After it restarts, tap **Turn On** and enter your passcode.
+   If you don't see *Developer Mode* in that menu yet, do way A or B below first. The option appears after the first install try.
+   Then turn it on and run the install again.
+
+### Way A: from a Mac with Xcode
+1. Install **Xcode** from the Mac App Store. It's free but large, so give it a while. Open it once and let it finish installing its components.
+2. In Xcode: **Xcode → Settings → Accounts → +** at the bottom left **→ Apple ID**, and sign in.
 3. From the [latest release](https://github.com/roshangupta00750/echoes/releases/latest), download
-   **ECHOES-ios-project.tgz** and **install-on-iphone.command** into the same folder (for example Downloads).
-4. Plug in the iPhone/iPad and run, in Terminal:
+   **ECHOES-ios-project.tgz** and **install-on-iphone.command**. Leave both in your **Downloads** folder.
+4. Plug in the iPhone/iPad and keep it unlocked. Open **Terminal** (press ⌘ Space and type *Terminal*) and run:
    ```bash
    cd ~/Downloads
    bash install-on-iphone.command
    ```
    The script builds the game, signs it with your Apple ID and installs it. The first build takes a few minutes.
-5. If the iPhone says *"Untrusted Developer"*: **Settings → General → VPN & Device Management** → your Apple ID → **Trust**.
+   When it says **RESULT: INSTALLED**, the game is on your home screen. If something is missing, the script stops
+   and says what to fix (no Xcode, not signed in, device not found). It keeps its files in an `ECHOES-ios` folder next to it, and a full log in `ECHOES-ios-install-log.txt`.
+5. Continue with [Step 2](#step-2-trust-the-app-once).
 
-### From Windows, or a Mac without Xcode (Sideloadly)
-1. Install **Sideloadly** from <https://sideloadly.io>. On Windows it also asks for iTunes and iCloud from Apple's website (not the Microsoft Store versions).
-2. Download **ECHOES.ipa** from the [latest release](https://github.com/roshangupta00750/echoes/releases/latest).
-3. Plug in the iPhone/iPad, open Sideloadly, drag **ECHOES.ipa** in, enter your Apple ID, and press **Start**.
-4. Trust the developer on the device as in step 5 above.
+### Way B: from Windows, or a Mac without Xcode (Sideloadly)
+1. **On Windows only:** install **iTunes** and **iCloud for Windows** from Apple's website (apple.com), not from the
+   Microsoft Store. Sideloadly needs Apple's own versions to see the device.
+2. Install **Sideloadly** from <https://sideloadly.io>.
+3. Download **ECHOES.ipa** from the [latest release](https://github.com/roshangupta00750/echoes/releases/latest).
+4. Plug in the iPhone/iPad, unlock it, and open Sideloadly. Your device should appear at the top.
+5. Drag **ECHOES.ipa** into Sideloadly, type your Apple ID in the *Apple account* box, and press **Start**.
+   Enter your Apple ID password when asked, and the code Apple sends if you use two-factor sign-in.
+6. Wait for **Done**. Then continue with Step 2.
 
-On iPhone, **SHARE** shows your score card full-screen to screenshot (side button + volume up), and copies the share text.
-In LAN games, if the host isn't listed on an iPhone, use **ENTER ADDRESS** with the address shown on the host's screen.
+### Step 2: trust the app (once)
+The first time you tap **ECHOES** on the home screen, iOS says *"Untrusted Developer"*. Fix that once:
+**Settings → General → VPN & Device Management** → tap your Apple ID under *Developer App* → **Trust**.
+Now open ECHOES. The device needs to be online for this one check.
+
+### Every 7 days (free Apple ID)
+When ECHOES stops opening, plug in and do way A step 4, or way B steps 4–6, again. You don't need to redo
+Step 1 or Step 2. Your progress stays on the device.
+
+### Updating to a new version
+Delete the old **ECHOES-ios-project.tgz** / **ECHOES.ipa** from Downloads first. Otherwise the browser saves the new
+one as *"… (1)"*. Then download the new files from the latest release and install the same way, right over the old
+version. Your progress is kept. Use the same way (A or B) each time: the two install the game under different
+names, so switching gives you a second copy with its own progress.
+
+### On the iPhone or iPad
+- **Controls:** touch, tilt and tilt + touch all work. If tilt feels wrong, use **SETTINGS → CALIBRATE TILT**.
+- **LAN games:** iOS asks *"ECHOES would like to find devices on your local network"* the first time. Tap **Allow**,
+  or the game can't see or host LAN games. You can change it later in **Settings → Privacy & Security → Local Network**.
+  If a host still isn't listed, use **ENTER ADDRESS** with the address shown on the host's screen.
+  iPhones, iPads and Android phones can all play together on the same Wi-Fi, as long as everyone has the same version.
+- **Sharing a score:** **SHARE** shows your score card full-screen and copies the share text. Take a screenshot
+  (side or top button + volume up), then send it with the text pasted in.
+
+### If something goes wrong
+| What you see | What to do |
+|---|---|
+| *Untrusted Developer* | Step 2 above |
+| *Unable to Verify App* | Connect the device to the internet and open ECHOES again |
+| ECHOES stopped opening after a week | The 7-day free signing ran out. Install again (see *Every 7 days*) |
+| *Developer Mode required* | Step 1, item 2 |
+| Mac script says *NO_DEVICE* | Unlock the device, replug the cable, tap Trust, check Developer Mode is on |
+| Mac script says *NO_APPLE_ID* | Sign in under Xcode → Settings → Accounts, then run it again |
+| Sideloadly: *maximum number of apps* | A free Apple ID allows 3 self-installed apps. Delete one you don't use and try again |
+| Sideloadly doesn't see the device (Windows) | Install iTunes and iCloud from Apple's website, not the Microsoft Store, and replug |
 
 ## Features
 - **Modes:** Normal, Hard and Extreme. In Extreme the newest echo hunts you and shards drift if you wait. Each mode opens by clearing level 6 of the one before.
