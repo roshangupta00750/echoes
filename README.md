@@ -124,8 +124,8 @@ names, so switching gives you a second copy with its own progress.
   or the game can't see or host LAN games. You can change it later in **Settings → Privacy & Security → Local Network**.
   If a host still isn't listed, use **ENTER ADDRESS** with the address shown on the host's screen.
   iPhones, iPads and Android phones can all play together on the same Wi-Fi, as long as everyone has the same version.
-- **Sharing a score:** **SHARE** shows your score card full-screen and copies the share text. Take a screenshot
-  (side or top button + volume up), then send it with the text pasted in.
+- **Sharing a score:** **SHARE** opens the iOS share menu with your score card and a line of text, ready for
+  WhatsApp, Instagram, Messages or *Save Image*.
 
 ### If something goes wrong
 | What you see | What to do |
@@ -145,7 +145,7 @@ names, so switching gives you a second copy with its own progress.
 - **Fair deaths:** safe spawns, rings on resting echoes, path previews at 3-2-1, and a replay of the past self that caught you.
 - **LAN multiplayer** on the same Wi-Fi or hotspot: everyone's runs become echoes for everyone. Get caught and you come back as a **zombie** that hunts the living. Last human standing wins.
 - **Controls:** touch (a floating stick), tilt, or tilt to steer and touch to go, with a 3-step tilt calibration.
-- **Sharing:** a 1080×1080 score card that draws every one of your past runs, shared through Android's share menu.
+- **Sharing:** a 1080×1080 score card that draws every one of your past runs, shared through the phone's share menu (Android, iPhone and iPad).
 - No ads, no accounts, no analytics, no tracking.
 
 ## Run it from the source code (for players, forks and contributors)
