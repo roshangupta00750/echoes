@@ -13,6 +13,6 @@ and release your adaptations under the same license.
 Full text: https://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 The source code (everything that isn't art or audio, including the `.gd` scripts, the shader and the
-`tools/` scripts themselves) is under the MIT license in `LICENSE`.
+`tools/` scripts themselves) is under the Apache License 2.0 in `LICENSE`.
 
 The game is built with the Godot Engine (MIT license, https://godotengine.org/license).

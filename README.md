@@ -136,7 +136,7 @@ User arguments go after `--`, for example `Godot --path . -- --autoplay --mode=h
 - `fdroid/`: the F-Droid build recipe (see `fdroid/README.md`)
 
 ## License
-- Code: [MIT](LICENSE)
+- Code: [Apache License 2.0](LICENSE) (see also [NOTICE](NOTICE))
 - Art and audio (everything in `assets/`, and the store images): [CC BY-SA 4.0](LICENSE-ASSETS.md)
 - Built with [Godot Engine](https://godotengine.org) (MIT)
 
