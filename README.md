@@ -2,9 +2,9 @@
 
 **Every level, your past runs come back as echoes. Don't touch them.**
 
-[![ECHOES gameplay: a run on Normal, up to level 7](docs/media/gameplay.gif)](docs/media/gameplay.mp4)
+https://github.com/user-attachments/assets/8a606bdb-8be3-43f7-bf5d-d86016d37bb1
 
-▶ **[Watch a full run with sound (1:36, MP4)](docs/media/gameplay.mp4)**, recorded on an Android phone.
+*A full run on Normal, up to level 7 (1:36, with sound), recorded on an Android phone.*
 
 ## Download
 
