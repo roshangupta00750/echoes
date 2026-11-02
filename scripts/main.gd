@@ -1067,11 +1067,12 @@ func _draw_hud(ci: CanvasItem) -> void:
 
 func _draw_title(ci: CanvasItem) -> void:
 	var w := view.x; var h := view.y
-	ci.draw_rect(Rect2(0, 0, w, h), Color(0.02, 0.0, 0.05, 0.55))
+	ci.draw_rect(Rect2(0, 0, w, h), Color(0.02, 0.0, 0.05, 0.8))
 	var cols := [Color(1, 0.25, 0.7), Color(1, 0.5, 0.1), Color(0.62, 0.38, 1.0)]
 	for k in range(3, 0, -1):
-		var off := Vector2(sin(t_ui * 1.3 + k) * 3.0 * k, cos(t_ui * 1.1 + k) * 1.5 * k)
-		_big(ci, "ECHOES", Vector2(w / 2, 26) + off, Color(cols[k - 1], 0.35), 2)
+		# three faint echoes of the logo, a pixel or two behind it, drifting slowly
+		var off := Vector2(sin(t_ui * 1.3 + k) * 0.8 + k * 1.0, cos(t_ui * 1.1 + k) * 0.5 + k * 0.6).round()
+		_big(ci, "ECHOES", Vector2(w / 2, 26) + off, Color(cols[k - 1], 0.22), 2)
 	_big(ci, "ECHOES", Vector2(w / 2, 26), Color(0.4, 1, 1), 2)
 	Art.text(ci, "EVERY LEVEL, YOUR PAST SELVES COME BACK.  DON'T TOUCH THEM.", Vector2(w / 2, 47), Color(1, 1, 1), false, 1)
 	var m := _solo_mode()
@@ -1083,7 +1084,8 @@ func _draw_title(ci: CanvasItem) -> void:
 	Art.text(ci, "PLAY " + EchoGame.MODE_NAMES[m], Vector2(w / 2, 88), Color(0.03, 0.01, 0.07), true, 1, Color(0, 0, 0, 0))
 	var nm := next_medal(m)
 	var sub := "GRAB 5 SHARDS.  DODGE YOURSELF."
-	if best_of(m) > 0: sub = "BEST %d  -  NEXT: %s AT LEVEL %d" % [best_of(m), nm[1], nm[0]] if not nm.is_empty() else "BEST %d  -  ALL MEDALS WON" % best_of(m)
+	# at most 34 characters, so it always fits inside the button
+	if best_of(m) > 0: sub = "BEST %d  -  %s AT LEVEL %d" % [best_of(m), nm[1], nm[0]] if not nm.is_empty() else "BEST %d  -  ALL MEDALS" % best_of(m)
 	Art.text(ci, sub, Vector2(w / 2, 107), Color(0.03, 0.01, 0.07, 0.8), false, 1, Color(0, 0, 0, 0))
 	_btn(ci, Rect2(x, 125, 111, 24), "DAILY RUN", func(): daily_run = true; _start_solo(), "secondary", Color(1, 0.8, 0.25))
 	_btn(ci, Rect2(x + 117, 125, 111, 24), "PROGRESS", func(): screen = "stats")

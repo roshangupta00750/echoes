@@ -841,12 +841,14 @@ func _draw() -> void:
 		if multi() and _show_label(id):
 			var label: String = "YOU" if id == local_id else p["name"]
 			Art.text(self, label, o + p["pos"] + Vector2(0, -14), Color(pc, 0.85), false, 1)
+	var fx := 0.35 if demo else 1.0          # behind the menus, effects stay faint
 	for q in rings:
 		var k: float = 1.0 - q[1] / 0.5
-		draw_arc(o + q[0], 4.0 + q[3] * k, 0, TAU, 24, Color(q[2], clampf(q[1] * 2.2, 0.0, 1.0)), 1.0)
+		draw_arc(o + q[0], 4.0 + q[3] * k, 0, TAU, 24, Color(q[2], clampf(q[1] * 2.2, 0.0, 1.0) * fx), 1.0)
 	for q in parts:
-		var pa := clampf(q["life"] * 2.0, 0.0, 1.0)
+		var pa := clampf(q["life"] * 2.0, 0.0, 1.0) * fx
 		draw_rect(Rect2((o + q["p"]).round() - Vector2(1, 1), Vector2(2, 2)), Color(q["col"], pa))
 		draw_rect(Rect2((o + q["p"]).round() - Vector2(2, 2), Vector2(4, 4)), Color(q["col"], pa * 0.25))
-	for q in popups:
-		Art.text(self, q["s"], o + q["p"], Color(q["col"], clampf(q["life"] * 2.0, 0.0, 1.0)), false, 1)
+	if not demo:                             # no "TIME BONUS" text under the title-screen buttons
+		for q in popups:
+			Art.text(self, q["s"], o + q["p"], Color(q["col"], clampf(q["life"] * 2.0, 0.0, 1.0)), false, 1)
