@@ -29,5 +29,14 @@ Test flags (user args after `--`):
 - `--host --players=N` / `--join=IP`
 - `--shot=PATH --shot_at=SECONDS --quit_after_shot`
 
+## License
+- Code: [MIT](LICENSE)
+- Art and audio (everything in `assets/`, and the store images): [CC BY-SA 4.0](LICENSE-ASSETS.md)
+- Built with [Godot Engine](https://godotengine.org) (MIT)
+
+## Privacy
+ECHOES has no ads, no accounts, no analytics and no tracking. The network permissions are used only for
+LAN games on your own Wi-Fi/hotspot. Your progress stays on your phone.
+
 ## Author
 Roshan Kumar Gupta

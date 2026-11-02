@@ -1,0 +1,52 @@
+Categories:
+  - Action Game
+  - Party Game
+License: MIT
+AuthorName: Roshan Kumar Gupta
+SourceCode: https://github.com/roshangupta00750/echoes
+IssueTracker: https://github.com/roshangupta00750/echoes/issues
+
+AutoName: ECHOES
+
+RepoType: git
+Repo: https://github.com/roshangupta00750/echoes.git
+
+Builds:
+  - versionName: '1.5'
+    versionCode: 9
+    commit: v1.5
+    sudo:
+      - apt-get update
+      - apt-get install -y scons pkg-config libx11-dev libxcursor-dev 
+        libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev libasound2-dev 
+        libpulse-dev libudev-dev libxi-dev libxrandr-dev libwayland-dev
+    output: echoes.apk
+    srclibs:
+      - godot@ed1daf0bf001b61586d9930840f2f1394092c079
+    prebuild: sed -i -e 's/package\/signed=true/package\/signed=false/' -e 
+      's|^export_path=.*|export_path="echoes.apk"|' export_presets.cfg
+    scandelete:
+      - $$godot$$/platform/android/java/gradle
+    build:
+      - export ANDROID_HOME=$$SDK$$
+      - pushd $$godot$$
+      - scons -j$(nproc) platform=linuxbsd target=editor production=yes
+      - scons -j$(nproc) platform=android target=template_release arch=arm64 
+        production=yes
+      - pushd platform/android/java
+      - gradle generateGodotTemplates
+      - popd
+      - popd
+      - mkdir -p $HOME/.local/share/godot/export_templates/4.7.2.stable
+      - cp $$godot$$/bin/android_release.apk $$godot$$/bin/android_source.zip 
+        $HOME/.local/share/godot/export_templates/4.7.2.stable/
+      - $$godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --path . --import
+      - $$godot$$/bin/godot.linuxbsd.editor.x86_64 --headless --path . 
+        --export-release Android echoes.apk
+    ndk: 29.0.14206865
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: export_presets.cfg|version/code=(\d+)|.|version/name="([\d.]+)"
+CurrentVersion: '1.5'
+CurrentVersionCode: 9

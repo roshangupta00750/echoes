@@ -1,0 +1,5 @@
+First F-Droid release (1.5).
+- Normal, Hard and Extreme modes, Daily Run, 14 missions, medals and unlockable styles.
+- LAN multiplayer with zombie infection.
+- Tilt calibration, fair spawns, echo previews and death replays.
+- Shareable 1080x1080 score card.

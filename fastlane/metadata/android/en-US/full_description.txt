@@ -1,0 +1,17 @@
+Every level you grab five gold shards before the clock runs out. Then your run comes back: an echo that replays exactly what you did. Touch a moving echo and you're out.
+
+Level 1 is just you. Level 10 is you, dodging nine of yourself. Every move you make becomes an obstacle later, so the real skill is keeping your own path tidy.
+
+<b>Features</b>
+<ul>
+<li>Three modes: Normal, Hard and Extreme. In Extreme the newest echo hunts you and shards drift away if you wait.</li>
+<li>A Daily Run with the same start for everyone, and a daily streak.</li>
+<li>14 missions, bronze, silver and gold medals for every mode, and unlockable trails and echo colours.</li>
+<li>Fair deaths: safe spawns, rings that show when a resting echo will move, path previews before each level, and a replay of the past self that caught you.</li>
+<li>LAN multiplayer on the same Wi-Fi or hotspot: everyone's runs become echoes for everyone. Get caught and you come back as a zombie that hunts the living. Last human standing wins.</li>
+<li>Touch, tilt, or tilt to steer and touch to go, with tilt calibration.</li>
+<li>A shareable score card that draws every one of your past runs.</li>
+<li>Retro look with an optional CRT filter, and synth music.</li>
+</ul>
+
+No ads, no accounts, no analytics, no tracking. The network permissions are only used for LAN games.
