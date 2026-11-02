@@ -25,6 +25,7 @@ const REPLAY := 1.0          # solo: the death replay plays this long before the
 var t_ui := 0.0
 var args := {}
 var view := Vector2(384, 216)
+var ui_oy := 0.0            # on screens taller than 16:9 (iPad, 4:3) the interface sits in a centred 216 px band
 var buttons: Array = []      # [Rect2, Callable] rebuilt every frame by the screen being drawn
 var new_best := false
 var just_unlocked := ""      # "hard" / "extreme": unlocked during the run that just ended
@@ -524,7 +525,7 @@ func _input(e: InputEvent) -> void:
 		if e.pressed:
 			# buttons first, on every screen
 			for b in buttons:
-				if (b[0] as Rect2).grow(3).has_point(p):
+				if (b[0] as Rect2).grow(3).has_point(p - Vector2(0, ui_oy)):
 					sound.sfx("sfx_move", -6, 1.0, 0); (b[1] as Callable).call(); return
 			if screen == "title": return
 			if screen == "name":
@@ -802,7 +803,7 @@ func _calib_tick(dt: float) -> void:
 
 func _draw_calib(ci: CanvasItem) -> void:
 	var w := view.x; var h := view.y
-	_dim(ci); ci.draw_rect(Rect2(Vector2.ZERO, view), Color(0, 0, 0, 0.5))
+	_dim(ci); ci.draw_rect(_full(), Color(0, 0, 0, 0.5))
 	Art.text(ci, "CALIBRATE TILT", Vector2(w / 2, 8), Color(1, 0.4, 0.85), true, 1)
 	var c := Vector2(w / 2, h / 2 + 4)
 	var lines := ["", ""]
@@ -963,6 +964,7 @@ func _heading(ci: CanvasItem, s: String) -> void:
 
 func _draw_ui(ci: CanvasItem) -> void:
 	buttons.clear()
+	ui_oy = 0.0
 	var w := view.x; var h := view.y
 	if card_open and card_tex:
 		# iOS: the card, as big as fits, with how to share it
@@ -972,6 +974,16 @@ func _draw_ui(ci: CanvasItem) -> void:
 		Art.text(ci, "SCREENSHOT TO SHARE (SIDE + VOLUME UP).  TEXT COPIED.  TAP TO CLOSE.", Vector2(w / 2, h - 16), Color(1, 0.85, 0.35), false, 1)
 		buttons.append([Rect2(Vector2.ZERO, view), func(): card_open = false])
 		return
+	var full_h := view.y
+	ui_oy = floorf(maxf(0.0, full_h - 216.0) / 2.0)
+	view.y = full_h - 2.0 * ui_oy
+	ci.draw_set_transform(Vector2(0, ui_oy))
+	_draw_screen(ci)
+	ci.draw_set_transform(Vector2.ZERO)
+	view.y = full_h
+
+func _draw_screen(ci: CanvasItem) -> void:
+	var w := view.x; var h := view.y
 	match screen:
 		"title": _draw_title(ci)
 		"settings": _draw_settings(ci)
@@ -1000,7 +1012,11 @@ func _draw_ui(ci: CanvasItem) -> void:
 
 ## menus sit on an almost solid panel, so the arena never runs through the text
 func _dim(ci: CanvasItem) -> void:
-	ci.draw_rect(Rect2(Vector2.ZERO, view), Color(0.02, 0.0, 0.05, 0.9))
+	ci.draw_rect(_full(), Color(0.02, 0.0, 0.05, 0.9))
+
+## the whole screen, in band coordinates
+func _full() -> Rect2:
+	return Rect2(0, -ui_oy, view.x, view.y + 2.0 * ui_oy)
 
 func _draw_hud(ci: CanvasItem) -> void:
 	var w := view.x; var h := view.y
@@ -1008,12 +1024,13 @@ func _draw_hud(ci: CanvasItem) -> void:
 	var p := g.me()
 	var lx := 8.0 + safe_l
 	Art.text(ci, "LEVEL %d" % g.level, Vector2(lx, 4), Color(1, 0.4, 0.85), true)
-	Art.text(ci, ("DAILY" if daily_run and not g.multi() else EchoGame.MODE_NAMES[g.mode]), Vector2(lx, 22), Color(EchoGame.MODE_COLS[g.mode], 0.9))
+	var mname: String = "DAILY" if daily_run and not g.multi() else EchoGame.MODE_NAMES[g.mode]
+	Art.text(ci, mname, Vector2(lx, 22), Color(EchoGame.MODE_COLS[g.mode], 0.9))
 	if not g.multi() and not daily_run:
-		# the next medal you haven't got, and haven't already passed this run
+		# the next medal you haven't got, and haven't already passed this run, on the same line (clear of the arena)
 		for md in MEDALS:
 			if int(md[0]) > g.level and int(md[0]) > level_of(g.mode):
-				Art.text(ci, "%s AT %d" % [md[1], md[0]], Vector2(lx, 31), Color(md[2], 0.75)); break
+				Art.text(ci, "%s AT %d" % [md[1], md[0]], Vector2(lx + Art.text_w(mname) + 6, 22), Color(md[2], 0.75)); break
 	# the score pops when it goes up
 	var sc := int(p.get("score", 0))
 	if sc != hud_score: hud_score = sc; score_pop = 0.25
@@ -1074,8 +1091,9 @@ func _draw_hud(ci: CanvasItem) -> void:
 	if tip_t > 0.0 and g.state != "clear":
 		Art.text(ci, tip, Vector2(w / 2, h - 18), Color(1, 1, 0.75, clampf(tip_t, 0.0, 1.0)), false, 1)
 	if stick_on and screen == "play":
-		ci.draw_arc(stick_o, 22, 0, TAU, 24, Color(1, 1, 1, 0.15), 1.0)
-		ci.draw_circle(stick_o + (stick_p - stick_o).limit_length(22.0), 5, Color(0.4, 1, 1, 0.3))
+		var so := stick_o - Vector2(0, ui_oy)
+		ci.draw_arc(so, 22, 0, TAU, 24, Color(1, 1, 1, 0.15), 1.0)
+		ci.draw_circle(so + (stick_p - stick_o).limit_length(22.0), 5, Color(0.4, 1, 1, 0.3))
 	if save["control"] == "tilt_hold" and screen == "play" and touches.is_empty() and g.state == "play":
 		Art.text(ci, "TOUCH ANYWHERE TO GO", Vector2(w / 2, h / 2 + 24), Color(1, 1, 1, 0.5 + 0.5 * sin(t_ui * 6.0)), false, 1)
 	if screen == "paused":
@@ -1089,7 +1107,7 @@ func _draw_hud(ci: CanvasItem) -> void:
 
 func _draw_title(ci: CanvasItem) -> void:
 	var w := view.x; var h := view.y
-	ci.draw_rect(Rect2(0, 0, w, h), Color(0.02, 0.0, 0.05, 0.8))
+	ci.draw_rect(_full(), Color(0.02, 0.0, 0.05, 0.8))
 	var cols := [Color(1, 0.25, 0.7), Color(1, 0.5, 0.1), Color(0.62, 0.38, 1.0)]
 	for k in range(3, 0, -1):
 		# three faint echoes of the logo, a pixel or two behind it, drifting slowly
@@ -1249,7 +1267,7 @@ func _draw_over(ci: CanvasItem) -> void:
 	var w := view.x; var h := view.y
 	var a := clampf((t_ui - over_at - REPLAY) / 0.6, 0.0, 1.0)
 	if a <= 0.0: return             # the death replay is still playing
-	ci.draw_rect(Rect2(0, 0, w, h), Color(0.02, 0, 0.05, 0.97 * a))
+	ci.draw_rect(_full(), Color(0.02, 0, 0.05, 0.97 * a))
 	var g := game
 	var mc: Color = EchoGame.MODE_COLS[g.mode]
 	var badge: String = "DAILY RUN" if daily_run else EchoGame.MODE_NAMES[g.mode]
@@ -1294,7 +1312,7 @@ func _mp_ranked() -> Array:
 func _draw_mp_over(ci: CanvasItem) -> void:
 	var w := view.x; var h := view.y
 	var a := clampf((t_ui - over_at) / 0.8, 0.0, 1.0)
-	ci.draw_rect(Rect2(0, 0, w, h), Color(0.02, 0, 0.05, 0.86 * a))
+	ci.draw_rect(_full(), Color(0.02, 0, 0.05, 0.86 * a))
 	var g := game
 	var title := "NOBODY SURVIVED"
 	if g.winner >= 0: title = "YOU WIN!" if g.winner == g.local_id else "%s WINS" % g.players[g.winner]["name"]
