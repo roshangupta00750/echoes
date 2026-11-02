@@ -9,6 +9,7 @@
 **[⬇ Download ECHOES for Android (APK)](https://github.com/roshangupta00750/echoes/releases/latest/download/echoes.apk)**: one click and the file downloads.
 
 - Every version, with release notes: **[Releases](https://github.com/roshangupta00750/echoes/releases)**
+- **iPhone / iPad:** there's no App Store version. You install it yourself from a Mac or a Windows PC, signed with your own free Apple ID. See [Install on iPhone or iPad](#install-on-iphone-or-ipad).
 - Coming soon on **F-Droid**.
 - Needs Android 7.0 or newer (64-bit / arm64, which is almost every phone from the last few years).
 
@@ -51,6 +52,37 @@ cd ~/Downloads
 adb devices
 adb install -r echoes.apk
 ```
+
+## Install on iPhone or iPad
+Apple doesn't let an app file be installed on iPhones the way an APK is installed on Android.
+You install ECHOES from a computer instead, signed with **your own Apple ID**. A free one is fine.
+With a free Apple ID the game keeps working for **7 days**; after that, plug in and install again to renew it.
+Nothing is lost when you renew it.
+
+First, on the iPhone or iPad, once: plug it into the computer, unlock it and tap **Trust**.
+Then turn on **Settings → Privacy & Security → Developer Mode** (the device restarts).
+
+### From a Mac (with Xcode)
+1. Install **Xcode** from the Mac App Store and open it once.
+2. In Xcode: **Settings → Accounts → +** → sign in with your Apple ID.
+3. From the [latest release](https://github.com/roshangupta00750/echoes/releases/latest), download
+   **ECHOES-ios-project.tgz** and **install-on-iphone.command** into the same folder (for example Downloads).
+4. Plug in the iPhone/iPad and run, in Terminal:
+   ```bash
+   cd ~/Downloads
+   bash install-on-iphone.command
+   ```
+   The script builds the game, signs it with your Apple ID and installs it. The first build takes a few minutes.
+5. If the iPhone says *"Untrusted Developer"*: **Settings → General → VPN & Device Management** → your Apple ID → **Trust**.
+
+### From Windows, or a Mac without Xcode (Sideloadly)
+1. Install **Sideloadly** from <https://sideloadly.io>. On Windows it also asks for iTunes and iCloud from Apple's website (not the Microsoft Store versions).
+2. Download **ECHOES.ipa** from the [latest release](https://github.com/roshangupta00750/echoes/releases/latest).
+3. Plug in the iPhone/iPad, open Sideloadly, drag **ECHOES.ipa** in, enter your Apple ID, and press **Start**.
+4. Trust the developer on the device as in step 5 above.
+
+On iPhone, **SHARE** shows your score card full-screen to screenshot (side button + volume up), and copies the share text.
+In LAN games, if the host isn't listed on an iPhone, use **ENTER ADDRESS** with the address shown on the host's screen.
 
 ## Features
 - **Modes:** Normal, Hard and Extreme. In Extreme the newest echo hunts you and shards drift if you wait. Each mode opens by clearing level 6 of the one before.
@@ -117,6 +149,14 @@ The APK lands in `build/echoes.apk`. Install it with the `adb install -r` comman
 
 For a **release** build signed with your own key, set these three environment variables and use `--export-release` instead of `--export-debug`:
 `GODOT_ANDROID_KEYSTORE_RELEASE_PATH`, `GODOT_ANDROID_KEYSTORE_RELEASE_USER`, `GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD`.
+
+### 5. Build for iPhone / iPad from source (Mac)
+In Godot, **Project → Export… → iOS → Export Project**. The preset already has *Export Project Only* on and exports an
+Xcode project into `build/ios/`. Then, with the iPhone plugged in:
+```bash
+bash tools/ios/install-on-iphone.command      # builds, signs with your Apple ID, installs
+bash tools/ios/make-ipa.command               # or: an unsigned ECHOES.ipa for Sideloadly
+```
 
 ### Test flags
 User arguments go after `--`, for example `Godot --path . -- --autoplay --mode=hard`:

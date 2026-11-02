@@ -32,6 +32,10 @@ var mp_mode := "normal"      # the mode the host picked for the LAN match
 var sharing := false         # true for the frames the share card is captured: the card is drawn instead of the screen
 var daily_run := false       # this solo run is today's daily run
 var hud_score := 0
+var safe_l := 0.0            # notch / rounded corners, in game pixels: the HUD keeps clear of them
+var safe_r := 0.0
+var card_tex: ImageTexture   # iOS: the share card shown full-screen to screenshot
+var card_open := false
 var hud_got := 0
 var pip_pop := 0.0
 var score_pop := 0.0
@@ -570,7 +574,7 @@ func _share_text() -> String:
 	return t + ("  " + STORE_LINK if STORE_LINK != "" else "")
 
 func _share() -> void:
-	if sharing: return
+	if sharing or card_open: return
 	_mission("share")
 	sharing = true
 	var img: Image = await _render_card()
@@ -580,6 +584,10 @@ func _share() -> void:
 	var text := _share_text()
 	if OS.get_name() == "Android" and Engine.has_singleton("AndroidRuntime"):
 		_android_share(path, text)
+	elif OS.get_name() == "iOS":
+		# Godot can't open the iOS share sheet: show the card big, to screenshot, and copy the text
+		DisplayServer.clipboard_set(text)
+		card_tex = ImageTexture.create_from_image(img); card_open = true
 	else:
 		DisplayServer.clipboard_set(text)
 		_note("PICTURE SAVED, TEXT COPIED")
@@ -857,6 +865,11 @@ func _process(dt: float) -> void:
 	toast_t = maxf(0.0, toast_t - dt); score_pop = maxf(0.0, score_pop - dt); pip_pop = maxf(0.0, pip_pop - dt)
 	if screen == "play" and game and not game.demo: _stat("time", dt)
 	view = get_viewport_rect().size
+	var ws := DisplayServer.window_get_size()
+	if ws.x > 0 and OS.has_feature("mobile"):
+		var sa := DisplayServer.get_display_safe_area()
+		var k := view.x / float(ws.x)
+		safe_l = maxf(0.0, sa.position.x * k); safe_r = maxf(0.0, (ws.x - sa.end.x) * k)
 	crt.size = view
 	var mv := _movement()
 	if (args.has("autoplay") or args.has("host") or args.has("join")) and game and not game.demo and (game.me().get("alive", false) or game.me().get("zombie", false)):
@@ -951,6 +964,14 @@ func _heading(ci: CanvasItem, s: String) -> void:
 func _draw_ui(ci: CanvasItem) -> void:
 	buttons.clear()
 	var w := view.x; var h := view.y
+	if card_open and card_tex:
+		# iOS: the card, as big as fits, with how to share it
+		ci.draw_rect(Rect2(Vector2.ZERO, view), Color(0.02, 0.0, 0.05))
+		var side := h - 26.0
+		ci.draw_texture_rect(card_tex, Rect2(Vector2(w / 2 - side / 2, 4), Vector2(side, side)), false)
+		Art.text(ci, "SCREENSHOT TO SHARE (SIDE + VOLUME UP).  TEXT COPIED.  TAP TO CLOSE.", Vector2(w / 2, h - 16), Color(1, 0.85, 0.35), false, 1)
+		buttons.append([Rect2(Vector2.ZERO, view), func(): card_open = false])
+		return
 	match screen:
 		"title": _draw_title(ci)
 		"settings": _draw_settings(ci)
@@ -985,13 +1006,14 @@ func _draw_hud(ci: CanvasItem) -> void:
 	var w := view.x; var h := view.y
 	var g := game
 	var p := g.me()
-	Art.text(ci, "LEVEL %d" % g.level, Vector2(8, 4), Color(1, 0.4, 0.85), true)
-	Art.text(ci, ("DAILY" if daily_run and not g.multi() else EchoGame.MODE_NAMES[g.mode]), Vector2(8, 22), Color(EchoGame.MODE_COLS[g.mode], 0.9))
+	var lx := 8.0 + safe_l
+	Art.text(ci, "LEVEL %d" % g.level, Vector2(lx, 4), Color(1, 0.4, 0.85), true)
+	Art.text(ci, ("DAILY" if daily_run and not g.multi() else EchoGame.MODE_NAMES[g.mode]), Vector2(lx, 22), Color(EchoGame.MODE_COLS[g.mode], 0.9))
 	if not g.multi() and not daily_run:
 		# the next medal you haven't got, and haven't already passed this run
 		for md in MEDALS:
 			if int(md[0]) > g.level and int(md[0]) > level_of(g.mode):
-				Art.text(ci, "%s AT %d" % [md[1], md[0]], Vector2(8, 31), Color(md[2], 0.75)); break
+				Art.text(ci, "%s AT %d" % [md[1], md[0]], Vector2(lx, 31), Color(md[2], 0.75)); break
 	# the score pops when it goes up
 	var sc := int(p.get("score", 0))
 	if sc != hud_score: hud_score = sc; score_pop = 0.25
@@ -1003,12 +1025,12 @@ func _draw_hud(ci: CanvasItem) -> void:
 			var q: Dictionary = g.players[id]
 			var name: String = "YOU" if id == g.local_id else q["name"]
 			var zq: bool = q.get("zombie", false)
-			Art.text(ci, "%s%s %d" % ["Z " if zq else "", name, q["score"]], Vector2(w - 6, y), EchoGame.ZCOL if zq else Color(q["col"], 1.0 if q["alive"] else 0.35), false, 2)
+			Art.text(ci, "%s%s %d" % ["Z " if zq else "", name, q["score"]], Vector2(w - 6 - safe_r, y), EchoGame.ZCOL if zq else Color(q["col"], 1.0 if q["alive"] else 0.35), false, 2)
 			y += 9.0
 	else:
 		# how many of you there are: a ring like an echo, and the count
-		ci.draw_arc(Vector2(w - 34, 12), 4.0, 0, TAU, 14, Color(1, 0.5, 0.2), 1.5)
-		Art.text(ci, "%d" % g.runs.size(), Vector2(w - 26, 4), Color(1, 0.6, 0.3), true)
+		ci.draw_arc(Vector2(w - 34 - safe_r, 12), 4.0, 0, TAU, 14, Color(1, 0.5, 0.2), 1.5)
+		Art.text(ci, "%d" % g.runs.size(), Vector2(w - 26 - safe_r, 4), Color(1, 0.6, 0.3), true)
 		# pause: up by the score, away from where a thumb rests
 		var pr := Rect2(w / 2 + 70, 3, 24, 22)
 		buttons.append([pr, _pause])

@@ -47,6 +47,8 @@ full = Image.alpha_composite(bg, fg)
 # the full icon crops in a little, as launchers do, so the art is large
 crop = full.crop((9, 9, 99, 99))
 crop.resize((192, 192), Image.NEAREST).save(out + "/icon.png")
+# iOS: 1024x1024, no transparency; iOS rounds the corners itself
+crop.convert("RGB").resize((1024, 1024), Image.NEAREST).save(out + "/icon_1024.png")
 crop.resize((512, 512), Image.NEAREST).save(sys.argv[2] + "/icon_512.png")
 crop.resize((48, 48), Image.LANCZOS).save(sys.argv[2] + "/icon_48_preview.png")
 print("icons written")
