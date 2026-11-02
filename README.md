@@ -2,7 +2,9 @@
 
 **Every level, your past runs come back as echoes. Don't touch them.**
 
-![ECHOES: level 8, eight of you](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png)
+[![ECHOES gameplay: a run on Normal, up to level 7](docs/media/gameplay.gif)](docs/media/gameplay.mp4)
+
+▶ **[Watch a full run with sound (1:36, MP4)](docs/media/gameplay.mp4)**, recorded on an Android phone.
 
 ## Download
 
