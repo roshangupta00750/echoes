@@ -6,7 +6,7 @@ exec > >(tee ipa-log.txt) 2>&1
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 PROJ=ios
 if [ ! -d ios/ECHOES.xcodeproj ]; then
-  if [ -f ECHOES-ios-project.tgz ]; then tar xzf ECHOES-ios-project.tgz; elif [ -d ../../build/ios/ECHOES.xcodeproj ]; then PROJ=../../build/ios; fi
+  if [ -f ECHOES-ios-project.tgz ]; then tar xzf ECHOES-ios-project.tgz; elif [ -d ../../build/ios/ECHOES.xcodeproj ]; then PROJ=../../build/ios; bash add-native-share.sh "$PROJ"; fi
 fi
 xcodebuild -project "$PROJ/ECHOES.xcodeproj" -scheme ECHOES -configuration Release \
   -destination generic/platform=iOS -derivedDataPath build-unsigned \

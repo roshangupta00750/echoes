@@ -15,6 +15,7 @@ var screen := "title"        # title, settings, join, keypad, lobby, play, pause
 var stick_on := false
 var stick_o := Vector2.ZERO
 var stick_p := Vector2.ZERO
+var stick_r := 22.0           # how far the thumb moves for full speed, in game pixels: about 7 mm on any screen
 var stick_id := -1
 var touches := {}            # finger index -> position (TILT + HOLD: any finger down means go)
 var save := {"best": 0, "best_level": 0, "sound": true, "plays": 0, "control": "touch", "sens": 1, "flip_x": false, "flip_y": false, "last_ip": "",
@@ -37,6 +38,7 @@ var safe_l := 0.0            # notch / rounded corners, in game pixels: the HUD 
 var safe_r := 0.0
 var card_tex: ImageTexture   # iOS: the share card shown full-screen to screenshot
 var card_open := false
+var card_at := 0.0
 var hud_got := 0
 var pip_pop := 0.0
 var score_pop := 0.0
@@ -585,10 +587,22 @@ func _share() -> void:
 	var text := _share_text()
 	if OS.get_name() == "Android" and Engine.has_singleton("AndroidRuntime"):
 		_android_share(path, text)
-	elif OS.get_name() == "iOS":
-		# Godot can't open the iOS share sheet: show the card big, to screenshot, and copy the text
+	elif OS.get_name() == "iOS" or args.has("ios_card"):
 		DisplayServer.clipboard_set(text)
-		card_tex = ImageTexture.create_from_image(img); card_open = true
+		if FileAccess.file_exists("user://.share_ready") and not args.has("ios_card"):
+			# the app's native part (tools/ios/native) watches for this file and opens the iOS share sheet
+			# with the picture and the text. Written under another name first, so it's never read half-done.
+			var f := FileAccess.open("user://share_request.tmp", FileAccess.WRITE)
+			if f:
+				f.store_string(text); f.close()
+				DirAccess.rename_absolute(OS.get_user_data_dir() + "/share_request.tmp", OS.get_user_data_dir() + "/share_request.txt")
+				return
+		# no native part (an older build): show the card big, to screenshot
+		# shrunk smoothly to exactly the size it's shown at, so the small text stays readable
+		var small: Image = img.duplicate()
+		var side := int(view.y - 28.0)
+		small.resize(side, side, Image.INTERPOLATE_LANCZOS)
+		card_tex = ImageTexture.create_from_image(small); card_open = true; card_at = t_ui
 	else:
 		DisplayServer.clipboard_set(text)
 		_note("PICTURE SAVED, TEXT COPIED")
@@ -845,7 +859,7 @@ func _movement() -> Vector2:
 		"touch":
 			if stick_on:
 				var d := stick_p - stick_o
-				var R := 22.0
+				var R := stick_r
 				if d.length() > R: stick_o = stick_p - d.normalized() * R; d = stick_p - stick_o
 				mv = d / R
 				if mv.length() < 0.12: mv = Vector2.ZERO
@@ -871,6 +885,10 @@ func _process(dt: float) -> void:
 		var sa := DisplayServer.get_display_safe_area()
 		var k := view.x / float(ws.x)
 		safe_l = maxf(0.0, sa.position.x * k); safe_r = maxf(0.0, (ws.x - sa.end.x) * k)
+		# full speed after the same thumb movement on every screen. On a big screen (iPad) 22 game pixels
+		# is twice as far for the thumb as on a phone, which made the stick feel slow.
+		var dpi := DisplayServer.screen_get_dpi()
+		if dpi >= 100: stick_r = clampf(7.0 / 25.4 * dpi * k, 11.0, 22.0)
 	crt.size = view
 	var mv := _movement()
 	if (args.has("autoplay") or args.has("host") or args.has("join")) and game and not game.demo and (game.me().get("alive", false) or game.me().get("zombie", false)):
@@ -894,7 +912,9 @@ func _test_hooks() -> void:
 			set_meta("s2", 1); get_viewport().get_texture().get_image().save_png(String(args["over_shots"]) + "/over.png")
 	if args.has("share_test") and screen == "over" and t_ui - over_at > REPLAY + 1.5 and not has_meta("shared"):
 		set_meta("shared", 1); _share()
-	if args.has("autoplay") and screen == "over" and t_ui - over_at > REPLAY + (3.0 if args.has("share_test") else 2.0):
+	if args.has("card_shot") and card_open and t_ui - card_at > 0.4 and not has_meta("card_shot"):
+		set_meta("card_shot", 1); get_viewport().get_texture().get_image().save_png(String(args["card_shot"])); print("card shot")
+	if args.has("autoplay") and not args.has("stay") and screen == "over" and t_ui - over_at > REPLAY + (3.0 if args.has("share_test") else 2.0):
 		print("RESULT mode %s level %d score %d echoes %d killed_by %d" % [game.mode, game.level, game.score_of(1), game.runs.size(), game.killed_by]); get_tree().quit()
 	if args.has("host") and screen == "lobby" and roster.size() >= int(args.get("players", "2")) and not has_meta("started"):
 		set_meta("started", 1); print("HOST starting with ", roster); _host_start()
@@ -969,9 +989,10 @@ func _draw_ui(ci: CanvasItem) -> void:
 	if card_open and card_tex:
 		# iOS: the card, as big as fits, with how to share it
 		ci.draw_rect(Rect2(Vector2.ZERO, view), Color(0.02, 0.0, 0.05))
-		var side := h - 26.0
-		ci.draw_texture_rect(card_tex, Rect2(Vector2(w / 2 - side / 2, 4), Vector2(side, side)), false)
-		Art.text(ci, "SCREENSHOT TO SHARE (SIDE + VOLUME UP).  TEXT COPIED.  TAP TO CLOSE.", Vector2(w / 2, h - 16), Color(1, 0.85, 0.35), false, 1)
+		var side := float(card_tex.get_width())
+		ci.draw_texture_rect(card_tex, Rect2(Vector2(roundf(w / 2 - side / 2), 3), Vector2(side, side)), false)
+		Art.text(ci, "TAKE A SCREENSHOT TO SHARE IT.  THE TEXT IS COPIED.", Vector2(w / 2, h - 20), Color(1, 0.85, 0.35), false, 1)
+		Art.text(ci, "TAP TO CLOSE", Vector2(w / 2, h - 10), Color(0.6, 0.66, 0.8), false, 1)
 		buttons.append([Rect2(Vector2.ZERO, view), func(): card_open = false])
 		return
 	var full_h := view.y
@@ -1092,8 +1113,8 @@ func _draw_hud(ci: CanvasItem) -> void:
 		Art.text(ci, tip, Vector2(w / 2, h - 18), Color(1, 1, 0.75, clampf(tip_t, 0.0, 1.0)), false, 1)
 	if stick_on and screen == "play":
 		var so := stick_o - Vector2(0, ui_oy)
-		ci.draw_arc(so, 22, 0, TAU, 24, Color(1, 1, 1, 0.15), 1.0)
-		ci.draw_circle(so + (stick_p - stick_o).limit_length(22.0), 5, Color(0.4, 1, 1, 0.3))
+		ci.draw_arc(so, stick_r, 0, TAU, 24, Color(1, 1, 1, 0.15), 1.0)
+		ci.draw_circle(so + (stick_p - stick_o).limit_length(stick_r), 5, Color(0.4, 1, 1, 0.3))
 	if save["control"] == "tilt_hold" and screen == "play" and touches.is_empty() and g.state == "play":
 		Art.text(ci, "TOUCH ANYWHERE TO GO", Vector2(w / 2, h / 2 + 24), Color(1, 1, 1, 0.5 + 0.5 * sin(t_ui * 6.0)), false, 1)
 	if screen == "paused":

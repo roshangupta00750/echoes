@@ -32,6 +32,7 @@ fi
 if [ ! -d "$PROJ/ECHOES.xcodeproj" ]; then
   if [ -d ../../build/ios/ECHOES.xcodeproj ]; then
     PROJ=../../build/ios         # running from tools/ios in the source code, after a Godot export
+    bash add-native-share.sh "$PROJ" || fail NO_PROJECT "Could not add the share sheet to the exported project."
   else
     fail NO_PROJECT "Put ECHOES-ios-project.tgz (from the GitHub release) next to this script, or export the iOS preset from Godot first."
   fi
