@@ -6,6 +6,7 @@
 *.aab
 *.idsig
 builds/
+build/
 # old working copies of scripts
 tools/*_v*.gd.txt
 tools/*_solo_v1.gd.txt
