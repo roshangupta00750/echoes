@@ -1496,7 +1496,11 @@ func _draw_card_sq(ci: CanvasItem, S: Vector2) -> void:
 			# where you were caught
 			ci.draw_line(pp + Vector2(-6, -6), pp + Vector2(6, 6), Color(1, 1, 1), 2.0)
 			ci.draw_line(pp + Vector2(-6, 6), pp + Vector2(6, -6), Color(1, 1, 1), 2.0)
-			Art.text(ci, "CAUGHT HERE", pp + Vector2(0, -16), Color(1, 1, 1), false, 1)
+			# the label goes above the X, or below it when the X is at the top edge (clear of the mode badge)
+			var top := oc.y + EchoGame.ARENA.position.y * k
+			var lp := pp + (Vector2(0, -16) if pp.y - 16.0 > top + 2.0 else Vector2(0, 9))
+			lp.x = clampf(lp.x, 38.0, S.x - 38.0)
+			Art.text(ci, "CAUGHT HERE", lp, Color(1, 1, 1), false, 1)
 		else:
 			ci.draw_circle(pp, 6.0, Color(0.4, 1, 1, 0.3)); ci.draw_circle(pp, 3.5, Color(0.4, 1, 1)); ci.draw_circle(pp, 2.0, Color(1, 1, 1))
 	# the numbers
