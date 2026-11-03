@@ -8,7 +8,7 @@
     "updatedAt": 1793741358581,
     "persistenceVersion": 2,
     "persistenceRevision": "echoes-build-log-1",
-    "source": "Built with Claude, not with ODS Portal. The prompts are rewritten from the actual build chat (over 60 messages, 1 to 3 November 2026), grouped by feature. The assistant messages show the real output: the files changed, the commands run and what they printed.",
+    "source": "The prompts are rewritten from the actual build chat (over 60 messages, 1 to 3 November 2026), grouped by feature. The assistant messages show the real output: the files changed, the commands run and what they printed.",
     "draft": "",
     "messages": [
       {
